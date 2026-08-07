@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Services\LogService;
 
-class HomeController extends Controller
+class LogController extends Controller
 {
+    protected $logService;
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(LogService $logService)
     {
         $this->middleware('auth');
+        $this->logService = $logService;
     }
 
     /**
@@ -21,8 +24,9 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
+    public function list()
     {
-        return view('home');
+        $logs = $this->logService->getLogs();
+        return view('logs.list', compact('logs'));
     }
 }

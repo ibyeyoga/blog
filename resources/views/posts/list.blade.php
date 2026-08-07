@@ -21,25 +21,31 @@
                             </div>
                             <div class="col-md-4">
                                 <button type="submit" class="btn btn-primary">{{ __('Search') }}</button>
-                                <a href="{{ route('post.edit') }}" class="btn btn-success">{{ __('New Post') }}</a>
+                                <a href="{{ route('post.edit') }}" class="btn btn-success">{{ __('发贴') }}</a>
                             </div>
                         </div>
                     </form>
-
                     <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>标题</th>
                                 <th>内容</th>
+                                @if($isAdmin)
+                                    <th>作者</th>
+                                @endif
                                 <th>创建时间</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
+
                             @foreach($posts as $post)
                                 <tr>
                                     <td>{{ $post->title }}</td>
                                     <td>{{ \Illuminate\Support\Str::limit($post->content, 50) }}</td>
+                                    @if($isAdmin)
+                                        <td>{{ $post->owner_name }}</td>
+                                    @endif
                                     <td>{{ $post->created_at }}</td>
                                     <td>
                                         <a href="{{ route('post.edit', $post->id) }}" class="btn btn-sm btn-primary">编辑</a>

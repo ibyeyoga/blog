@@ -55,9 +55,10 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('post.list') }}">{{ __('My Posts') }}</a>
-                                    <a class="dropdown-item" href="{{ route('post.edit') }}">{{ __('New Post') }}</a>
-
+                                    @can('isSuper', Auth::user())
+                                        <a class="dropdown-item" href="{{ route('log.list') }}">{{ __('日志列表') }}</a>
+                                    @endcan
+                                    <a class="dropdown-item" href="{{ route('post.list') }}">{{ __('帖子列表') }}</a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();

@@ -31,9 +31,18 @@ class PostRepository {
 
     public function list($keyword = '', $orderBy = 'created_at', $orderDirection = 'desc'){
         $query = Post::query();
+        $query = $query->allWithOwnerName();
         if ($keyword) {
-            $query->where('title', 'like', '%' . $keyword . '%')
-                  ->orWhere('content', 'like', '%' . $keyword . '%');
+            $query = $query->keyword($keyword);
+        }
+        return $query->orderBy($orderBy, $orderDirection)->paginate(10);
+    }
+
+    public function listSelf($ownerId, $keyword = '', $orderBy = 'created_at', $orderDirection = 'desc'){
+        $query = Post::query();
+        $query = $query->owner($ownerId);
+        if ($keyword) {
+            $query = $query->keyword($keyword);
         }
         return $query->orderBy($orderBy, $orderDirection)->paginate(10);
     }

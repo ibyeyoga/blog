@@ -11,15 +11,19 @@ class PostController extends Controller
 
     public function __construct(PostService $postService)
     {
-        $this->middleware('auth');
         $this->postService = $postService;
+        $this->middleware('auth');
+        $this->middleware('operationCatch')->only(['post', 'del']);
     }
 
     public function list(Request $request)
     {
         $keyword = $request->input('keyword', '');
+        
         $posts = $this->postService->list($keyword);
-        return view('posts.list', compact('posts', 'keyword'));
+        $isAdmin = auth()->user()->role === \App\Enum\Role::ADMIN->value;
+
+        return view('posts.list', compact('posts', 'keyword', 'isAdmin'));
     }
 
     public function edit(Request $request, $id = null)
@@ -36,7 +40,13 @@ class PostController extends Controller
         $id = $request->post('id', null);
         $title = $request->post('title', '');
         $content = $request->post('content', '');
-
+        if($id!=null){
+            $post = $this->postService->get($id);
+            if (!$post) {
+                return redirect()->route('post.list')->with('message', '帖子不存在');
+            }
+            $this->authorize('view', $post);
+        }
         $flag = $this->postService->createOrUpdate($title, $content, $id);
 
         return redirect()->route('post.list')->with('message', $flag ? '操作成功' : '操作失败');
@@ -49,7 +59,7 @@ class PostController extends Controller
         if (!$post) {
             return redirect()->route('post.list')->with('message', '帖子不存在');
         }
-        $this->authorize('delete', $post);
+        $this->authorize('view', $post);
         $flag = $this->postService->delete($post);
         return redirect()->route('post.list')->with('message', $flag ? '删除成功' : '删除失败');
     }
