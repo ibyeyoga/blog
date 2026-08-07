@@ -21,8 +21,8 @@ class PostService {
         return $this->postRepository->create($title, $content);
     }
 
-    public function delete($id) {
-        return $this->postRepository->delete($id);
+    public function delete($post) {
+        return $this->postRepository->delete($post);
     }
 
     // 点查

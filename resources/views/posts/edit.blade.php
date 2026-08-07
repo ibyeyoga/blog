@@ -42,13 +42,13 @@
                         </div>
 
                         <div class="row mb-0">
-                            <div class="col-md-8 offset-md-2">
+                            <div class="col-md-3 offset-md-4">
                                 <button type="submit" class="btn btn-primary">
                                     提交
                                 </button>
                             </div>
 
-                            <div class="col-md-8 offset-md-2 mt-3">
+                            <div class="col-md-3">
                                 <a href="{{ route('post.list') }}" class="btn btn-secondary">
                                     返回
                                 </a>

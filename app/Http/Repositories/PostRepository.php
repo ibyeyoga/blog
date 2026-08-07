@@ -25,11 +25,7 @@ class PostRepository {
         return $post->save();
     }
 
-    public function delete($id){
-        $post = Post::find($id);
-        if (!$post) {
-            return false;
-        }
+    public function delete($post){
         return $post->delete();
     }
 

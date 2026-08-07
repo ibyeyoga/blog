@@ -20,8 +20,8 @@
                                 <input type="text" name="keyword" class="form-control" placeholder="搜索标题或内容" value="{{ $keyword }}">
                             </div>
                             <div class="col-md-4">
-                                <button type="submit" class="btn btn-primary">搜索</button>
-                                <a href="{{ route('post.edit') }}" class="btn btn-success">新建</a>
+                                <button type="submit" class="btn btn-primary">{{ __('Search') }}</button>
+                                <a href="{{ route('post.edit') }}" class="btn btn-success">{{ __('New Post') }}</a>
                             </div>
                         </div>
                     </form>
@@ -29,7 +29,6 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>标题</th>
                                 <th>内容</th>
                                 <th>创建时间</th>
@@ -39,7 +38,6 @@
                         <tbody>
                             @foreach($posts as $post)
                                 <tr>
-                                    <td>{{ $post->id }}</td>
                                     <td>{{ $post->title }}</td>
                                     <td>{{ \Illuminate\Support\Str::limit($post->content, 50) }}</td>
                                     <td>{{ $post->created_at }}</td>

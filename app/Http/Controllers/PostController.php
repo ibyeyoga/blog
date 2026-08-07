@@ -42,8 +42,14 @@ class PostController extends Controller
         return redirect()->route('post.list')->with('message', $flag ? '操作成功' : '操作失败');
     }
 
-    public function del($post)
+    public function del()
     {
+        $id = request()->route('id');
+        $post = $this->postService->get($id);
+        if (!$post) {
+            return redirect()->route('post.list')->with('message', '帖子不存在');
+        }
+        $this->authorize('delete', $post);
         $flag = $this->postService->delete($post);
         return redirect()->route('post.list')->with('message', $flag ? '删除成功' : '删除失败');
     }
