@@ -20,7 +20,7 @@
                                 <input type="text" name="keyword" class="form-control" placeholder="搜索标题或内容" value="{{ $keyword }}">
                             </div>
                             <div class="col-md-4">
-                                <button type="submit" class="btn btn-primary">{{ __('Search') }}</button>
+                                <button type="submit" class="btn btn-primary">{{ __('查找帖子') }}</button>
                                 <a href="{{ route('post.edit') }}" class="btn btn-success">{{ __('发贴') }}</a>
                             </div>
                         </div>

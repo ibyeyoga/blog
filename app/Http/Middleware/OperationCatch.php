@@ -23,28 +23,32 @@ class OperationCatch
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $route = $request->route();
-
-        // 获取当前登录用户的 ID（未登录时为 null）
+        $response = $next($request);
         $userId = Auth::id();
-
-
         if ($userId) {
-            $operation = $route->getActionMethod();
-            $targetId = $route->parameter('id');
-            $target = $route->getName();
-            
-            if ($target === 'post.post') {
-                if($targetId !== null){
-                    $target = 'post_update';
-                } else {
-                    $target = 'post_create';
-                }
-            }
+            $this->doLog($request, $userId);
+        }
+        return $response;
+    }
 
-            $this->logService->addLog($userId, $operation, $target, $targetId);
+    private function doLog(Request $request, int $userId): void
+    {
+        $route = $request->route();
+        $operation = $route->getActionMethod();
+        $targetId = $route->parameter('id');
+        if ($targetId === null) {
+            $targetId = $request->post('id');
+        }
+        $target = $route->getName();
+
+        if ($target === 'post.post') {
+            if ($targetId !== null) {
+                $target = 'post_update';
+            } else {
+                $target = 'post_create';
+            }
         }
 
-        return $next($request);
+        $this->logService->addLog($userId, $operation, $target ?? '', $targetId);
     }
 }

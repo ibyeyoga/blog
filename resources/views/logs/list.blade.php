@@ -20,6 +20,7 @@
                                 <th>ID</th>
                                 <th>操作类型</th>
                                 <th>用户ID</th>
+                                <th>用户名</th>
                                 <th>目标类型</th>
                                 <th>目标ID</th>
                                 <th>操作时间</th>
@@ -32,6 +33,7 @@
                                     <td>{{ $log->id }}</td>
                                     <td>{{ $log->operation }}</td>
                                     <td>{{ $log->user_id }}</td>
+                                    <td>{{ $log->user_name }}</td>
                                     <td>{{ $log->target }}</td>
                                     <td>{{ $log->target_id }}</td>
                                     <td>{{ $log->created_at }}</td>
