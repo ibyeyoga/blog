@@ -1,0 +1,8 @@
+node_modules/
+vendor/
+.git/
+helm/
+storage/logs/
+bootstrap/cache/
+.env
+*.md
