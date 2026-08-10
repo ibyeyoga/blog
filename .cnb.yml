@@ -1,16 +1,12 @@
 master:
   push:
-    - docker:
-        build: 
-          dockerfile: ./helm/docker/Dockerfile
-          by:
-            - public
-            - resources
-            - package.json
-            - package-lock.json
-            - vite.config.js
-            - composer.json
-            - composer.lock
+    - services:
+        - docker
+      env:
+        IMAGE_TAG: ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:latest
       stages:
-        - name: sayhi
-          script: echo "hi"
+        - name: 构建运行镜像
+          script: docker build -t ${IMAGE_TAG} -f helm/docker/Dockerfile .
+            
+        - name: 上传镜像到制品库
+          script: docker push ${IMAGE_TAG}
