@@ -1,16 +1,16 @@
 master:
   push:
     - docker:
-        build: ./helm/docker/Dockerfile
-        context: .
-        by:
-          - public
-          - resources
-          - package.json
-          - package-lock.json
-          - vite.config.js
-          - composer.json
-          - composer.lock
+        build: 
+          dockerfile: ./helm/docker/Dockerfile
+          by:
+            - public
+            - resources
+            - package.json
+            - package-lock.json
+            - vite.config.js
+            - composer.json
+            - composer.lock
       stages:
         - name: sayhi
           script: echo "hi"
