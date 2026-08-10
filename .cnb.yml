@@ -29,6 +29,5 @@ master:
                 - helm package helm/blog
                 - helm push ${CNB_REPO_NAME}-${HELM_CHART_VERSION}.tgz oci://${CNB_HELM_REGISTRY}/${CNB_GROUP_SLUG_LOWERCASE}
 
-            # - name: 安装helm包
-            #   script: helm install ${CNB_REPO_NAME} \
-            #      oci://${CNB_HELM_REGISTRY}/${CNB_GROUP_SLUG_LOWERCASE} --version 0.1.0
+            - name: 更新helm包
+              script: helm upgrade --install ${CNB_REPO_SLUG_LOWERCASE} oci://${CNB_HELM_REGISTRY}/${CNB_GROUP_SLUG_LOWERCASE} --version ${HELM_CHART_VERSION}
