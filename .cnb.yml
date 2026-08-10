@@ -1,0 +1,5 @@
+main:
+  push:
+    - stages:
+        - name: echo-hello
+          script: echo "hello world"
