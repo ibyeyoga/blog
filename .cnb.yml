@@ -3,8 +3,8 @@ master:
     - docker:
         build: ./helm/docker/Dockerfile
         by:
-          - public
-          - resources
+          - public/**
+          - resources/**
           - package.json
           - package-lock.json
           - vite.config.js
