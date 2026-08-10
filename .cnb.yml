@@ -3,3 +3,5 @@ main:
     - stages:
         - name: echo-hello
           script: echo "hello world"
+        - name: echo-hello2
+          script: echo "hello world2"
