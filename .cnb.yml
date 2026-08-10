@@ -25,7 +25,7 @@ master:
               script:
                 - sed -i "s|__IMAGE__|${IMAGE}|" helm/blog/values.yaml
                 - sed -i "s|__TAG__|${CNB_COMMIT_SHORT}|" helm/blog/values.yaml
-                - helm package helm-blog
+                - helm package helm/blog
             # - name: 安装helm包
             #   script: helm install ${CNB_REPO_NAME} \
             #      oci://${CNB_HELM_REGISTRY}/${CNB_GROUP_SLUG_LOWERCASE} --version 0.1.0
