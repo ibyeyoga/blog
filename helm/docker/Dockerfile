@@ -47,7 +47,7 @@ COPY --from=composer --chown=www-data:www-data /app/vendor /var/www/html/vendor/
 COPY --from=node --chown=www-data:www-data /app/public/build /var/www/html/public/build/
 
 # 确保 storage 和 bootstrap/cache 可写
-RUN mkdir -p bootstrap/cache && chmod -R 775 storage bootstrap/cache
+RUN mkdir -p bootstrap/cache && mkdir -p storage/logs && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 9000
 
