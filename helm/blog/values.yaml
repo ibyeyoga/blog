@@ -6,8 +6,8 @@ image:
     tag: alpine
     pullPolicy: IfNotPresent
   php:
-    repository: blog-php
-    tag: latest
+    repository: __IMAGE__
+    tag: __TAG__
     pullPolicy: IfNotPresent
 
 env:

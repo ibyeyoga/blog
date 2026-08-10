@@ -3,10 +3,29 @@ master:
     - services:
         - docker
       env:
-        IMAGE_TAG: ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:latest
+        IMAGE: ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}
+        IMAGE_TAG: ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:${CNB_COMMIT_SHORT}
+        IMAGE_TAG_LATEST: ${CNB_DOCKER_REGISTRY}/${CNB_REPO_SLUG_LOWERCASE}:latest
       stages:
-        - name: 构建运行镜像
-          script: docker build -t ${IMAGE_TAG} -f helm/docker/Dockerfile .
-            
-        - name: 上传镜像到制品库
-          script: docker push ${IMAGE_TAG}
+        - name: 构建镜像
+          jobs:
+            - name: build image
+              script: docker build -t ${IMAGE_TAG} -f helm/docker/Dockerfile .
+            - name: push image
+              script: 
+                - docker push ${IMAGE_TAG}
+                - docker tag ${IMAGE_TAG} ${IMAGE_TAG_LATEST}
+
+        - name: helm打包
+          image: alpine/helm
+          jobs:
+            - name: 登录helm包仓库
+              script: helm registry login -u ${CNB_TOKEN_USER_NAME} -p "${CNB_TOKEN}" ${CNB_HELM_REGISTRY}
+            - name: 修改helm包信息
+              script:
+                - sed -i "s|__IMAGE__|${IMAGE}|" helm/blog/values.yaml
+                - sed -i "s|__TAG__|${CNB_COMMIT_SHORT}|" helm/blog/values.yaml
+                - helm package helm-blog
+            # - name: 安装helm包
+            #   script: helm install ${CNB_REPO_NAME} \
+            #      oci://${CNB_HELM_REGISTRY}/${CNB_GROUP_SLUG_LOWERCASE} --version 0.1.0
