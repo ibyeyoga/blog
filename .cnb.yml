@@ -29,5 +29,8 @@ master:
                 - helm package helm/blog
                 - helm push ${CNB_REPO_NAME}-${HELM_CHART_VERSION}.tgz oci://${CNB_HELM_REGISTRY}/${CNB_GROUP_SLUG_LOWERCASE}
 
-            - name: 更新helm包
-              script: helm upgrade --install ${CNB_REPO_SLUG_LOWERCASE} oci://${CNB_HELM_REGISTRY}/${CNB_GROUP_SLUG_LOWERCASE} --version ${HELM_CHART_VERSION}
+            - name: 更新集群的helm包
+              imports: secret.yml
+              script: 
+                - echo "${K8S_PROD_CONFIG_KEY}" > ~/.kube/config
+                - helm upgrade --install ${CNB_REPO_SLUG_LOWERCASE} oci://${CNB_HELM_REGISTRY}/${CNB_GROUP_SLUG_LOWERCASE} --version ${HELM_CHART_VERSION}
