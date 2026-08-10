@@ -1,5 +1,7 @@
 master:
   push:
-    - stages:
-        - name: test_tools
-          script: helm list
+    - docker:
+        build: ./helm/docker/Dockerfile
+      stages:
+        - name: sayhi
+          script: echo "hi"
