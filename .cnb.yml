@@ -2,9 +2,10 @@ master:
   push:
     - docker:
         build: ./helm/docker/Dockerfile
+        context: .
         by:
-          - public/**
-          - resources/**
+          - public
+          - resources
           - package.json
           - package-lock.json
           - vite.config.js
