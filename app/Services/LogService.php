@@ -1,21 +1,20 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Services;
 
-use \App\Http\Repositories\LogRepository;
-use \App\Enum\Operation;
+use App\Repositories\LogRepositoryEloquent;
 
 class LogService
 {
     protected $logRepository;
-    public function __construct(LogRepository $logRepository)
+    public function __construct(LogRepositoryEloquent $logRepository)
     {
         $this->logRepository = $logRepository;
     }
 
-    public function getLogs($keyword = null)
+    public function list()
     {
-        return $this->logRepository->getLogs();
+        return $this->logRepository->orderBy('created_at', 'desc')->paginate();
     }
 
     public function addLog($userId, $operation, $target = null, $targetId = null){

@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Services\LogService;
+use App\Services\LogService;
+use Illuminate\Support\Facades\Gate;
 
 class LogController extends Controller
 {
@@ -26,7 +27,13 @@ class LogController extends Controller
      */
     public function list()
     {
-        $logs = $this->logService->getLogs();
+        if(Gate::denies('super'))
+        {
+            // 没权限重定向
+            return redirect()->route('post.list')->with('message', '没有权限');
+        }
+
+        $logs = $this->logService->list();
         return view('logs.list', compact('logs'));
     }
 }

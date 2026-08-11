@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Services\PostService;
+use App\Http\Requests\PostDeleteRequest;
+use App\Services\PostService;
 use Illuminate\Http\Request;
+use App\Models\Post;
 
 class PostController extends Controller
 {
@@ -19,47 +21,45 @@ class PostController extends Controller
     public function list(Request $request)
     {
         $keyword = $request->input('keyword', '');
-        
-        $posts = $this->postService->list($keyword);
-        $isAdmin = auth()->user()->role === \App\Enum\Role::ADMIN->value;
-
-        return view('posts.list', compact('posts', 'keyword', 'isAdmin'));
+        $posts = $this->postService->list();
+        return view('posts.list', compact('posts', 'keyword'));
     }
 
-    public function edit(Request $request, $id = null)
+    public function edit($id = null)
     {
-        $post = null;
-        if ($id) {
+        // 这里公用一个接口，id是否为null判断是编辑还是新建
+        // 编辑需要鉴权
+        if ($id === null)
+        {
+            $post = [];
+        } else {
             $post = $this->postService->get($id);
+            $this->authorize('view', $post);
         }
+
         return view('posts.edit', compact('post', 'id'));
     }
 
     public function post(Request $request)
     {
-        $id = $request->post('id', null);
-        $title = $request->post('title', '');
-        $content = $request->post('content', '');
-        if($id!=null){
-            $post = $this->postService->get($id);
-            if (!$post) {
-                return redirect()->route('post.list')->with('message', '帖子不存在');
-            }
-            $this->authorize('view', $post);
+        $post = null;
+        $postData = $request->post();
+        if($postData['id'] != null)
+
+        {
+            $post = $this->postService->get($postData['id']);
+        } else {
+            $post = Post::class;
         }
-        $flag = $this->postService->createOrUpdate($title, $content, $id);
+
+        $this->authorize('createOrUpdate', $post);
+        $flag = $this->postService->createOrUpdate($post, $request->post());
 
         return redirect()->route('post.list')->with('message', $flag ? '操作成功' : '操作失败');
     }
 
-    public function del()
+    public function del(PostDeleteRequest $request, Post $post)
     {
-        $id = request()->route('id');
-        $post = $this->postService->get($id);
-        if (!$post) {
-            return redirect()->route('post.list')->with('message', '帖子不存在');
-        }
-        $this->authorize('view', $post);
         $flag = $this->postService->delete($post);
         return redirect()->route('post.list')->with('message', $flag ? '删除成功' : '删除失败');
     }

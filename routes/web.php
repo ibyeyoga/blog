@@ -12,7 +12,7 @@ Route::controller(App\Http\Controllers\PostController::class)->prefix('post')->g
     Route::get('/list', 'list')->name('post.list');
     Route::get('/edit/{id?}', 'edit')->name('post.edit');
     Route::post('/post', 'post')->name('post.post');
-    Route::post('/del/{id}', 'del')->name('post.del');
+    Route::post('/del/{post}', 'del')->name('post.del');
 });
 
 

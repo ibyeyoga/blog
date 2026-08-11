@@ -6,7 +6,9 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Services\LogService;
+use App\Services\LogService;
+
+use function Illuminate\Log\log;
 
 class OperationCatch
 {
@@ -23,12 +25,18 @@ class OperationCatch
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
+        return $next($request);
+    }
+
+    /**
+     * Handle tasks after the response has been sent to the browser.
+     */
+    public function terminate(Request $request, Response $response): void
+    {
         $userId = Auth::id();
         if ($userId) {
             $this->doLog($request, $userId);
         }
-        return $response;
     }
 
     private function doLog(Request $request, int $userId): void
