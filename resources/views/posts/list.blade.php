@@ -30,7 +30,7 @@
                             <tr>
                                 <th>标题</th>
                                 <th>内容</th>
-                                @if($isAdmin)
+                                @if(Gate::allows('super'))
                                     <th>作者</th>
                                 @endif
                                 <th>创建时间</th>
@@ -43,7 +43,7 @@
                                 <tr>
                                     <td>{{ $post->title }}</td>
                                     <td>{{ \Illuminate\Support\Str::limit($post->content, 50) }}</td>
-                                    @if($isAdmin)
+                                    @if(Gate::allows('super'))
                                         <td>{{ $post->owner_name }}</td>
                                     @endif
                                     <td>{{ $post->created_at }}</td>

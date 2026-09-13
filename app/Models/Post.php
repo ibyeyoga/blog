@@ -4,11 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-
+use Prettus\Repository\Contracts\Transformable;
+use Prettus\Repository\Traits\TransformableTrait;
 
 #[Fillable(['title', 'content', 'owner_id'])]
-class Post extends Model
+class Post extends Model implements Transformable
 {
+    use TransformableTrait;
+
     public function scopeOwner($query, $ownerId){
         return $query->where('owner_id', $ownerId);
     }
