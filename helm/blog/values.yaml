@@ -1,27 +1,103 @@
-replicaCount: 1
+# ============================================================================
+# 代码来源开关
+#
+#   host  = 本地开发：业务代码全部从宿主挂载，镜像只提供运行环境 + vendor
+#   image = 模拟生产：代码也在镜像里，完全不依赖宿主目录
+#
+# 两种模式都【一定包含 vendor】—— vendor 极少变化、构建镜像也是低频操作，
+# 所以放在构建期，Pod 启动什么都不用拷。
+#
+# 关键：host 模式下【不要】把整个项目根目录挂进去，否则 vendor 也被宿主
+# 那份覆盖，读它就要走 Windows↔WSL 桥接，几万个小文件慢到不可用。
+# 所以下面用显式列表逐个挂，vendor 不在列表里。
+# ============================================================================
+codeSource: host
 
+# ----------------------------------------------------------------------------
+# host 模式：宿主项目目录在 kind 节点容器里的路径
+# = kind-config.yml 的 extraMounts.containerPath + "/blog"
+# ----------------------------------------------------------------------------
+hostCode:
+  projectPath: /mnt/host/d/gits/blog
+
+  # 从宿主挂进来的路径（相对项目根）。刻意不含 vendor / node_modules。
+  #
+  # 因为镜像里【没有】业务代码，这份列表必须覆盖全 —— 漏了一个目录会直接
+  # 报"文件不存在"，一眼能发现，不会静默用旧代码。
+  #
+  # 注意 .env 也不挂：环境变量统一由下面的 env 段提供，避免宿主的 .env
+  # 干扰（Laravel 用 immutable 模式加载 .env，不会覆盖已有环境变量，
+  # 但 config:cache 之后容易混淆，干脆不挂）。
+  mounts:
+    - app
+    - bootstrap
+    - config
+    - database
+    - public
+    - resources
+    - routes
+    - storage
+    - tests
+    - artisan
+    - composer.json
+    - composer.lock
+    - package.json
+    - package-lock.json
+    - phpunit.xml
+    - vite.config.js
+
+# ----------------------------------------------------------------------------
+# 镜像
+#
+# 重要：kubelet 【不走】Docker Desktop 的镜像加速器，Pod 里拉 docker.io
+# 会 connection refused。所以容器镜像必须是：
+#   · 本地 build 后 kind load 进去的（:local 这些），或
+#   · 地址里已经写好国内可直连的仓库
+# ----------------------------------------------------------------------------
 image:
-  nginx:
-    repository: nginx
-    tag: alpine
-    pullPolicy: IfNotPresent
+  # 项目镜像。两个 tag 对应 Dockerfile 的两个构建目标，都包含 vendor：
+  #   dev  → 只有 vendor，代码从宿主挂载
+  #   prod → vendor + 代码 + 前端产物
   php:
     repository: blog-php
-    tag: latest
+    tagDev: dev
+    tagProd: prod
+    pullPolicy: IfNotPresent
+  nginx:
+    repository: docker.1ms.run/library/nginx
+    tag: "1.27"
     pullPolicy: IfNotPresent
 
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: nginx
+  host: blog.localhost
+
+# ----------------------------------------------------------------------------
+# 环境变量
+#
+# APP_KEY 故意不写在这里 —— 敏感值，写进仓库等于泄露。
+#   helm upgrade --install blog . -n devx \
+#     -f values.local.yaml --set env.APP_KEY=base64:xxxx
+# ----------------------------------------------------------------------------
 env:
   APP_NAME: Blog
-  APP_ENV: production
-  APP_KEY: base64:dg3cN0HMd9Mx3q6N/m2dtu8FUQvUhnbanU2D6xLBuao=
-  APP_DEBUG: "false"
+  APP_ENV: local
+  APP_DEBUG: "true"
   APP_URL: http://blog.localhost
+  LOG_CHANNEL: stderr
   DB_CONNECTION: mysql
-  DB_HOST: 
-  DB_PORT: 3306
+  DB_HOST: devx-mysql
+  DB_PORT: "3306"
   DB_DATABASE: blog
   DB_USERNAME: root
-  DB_PASSWORD: 
+  DB_PASSWORD: "123456"
   SESSION_DRIVER: database
   CACHE_STORE: database
   QUEUE_CONNECTION: database
@@ -29,18 +105,16 @@ env:
 resources:
   nginx:
     requests: { memory: 64Mi, cpu: 100m }
-    limits:   { memory: 128Mi, cpu: 200m }
+    limits: { memory: 128Mi, cpu: 200m }
   php:
     requests: { memory: 256Mi, cpu: 200m }
-    limits:   { memory: 1024Mi, cpu: 500m }
+    limits: { memory: 1024Mi, cpu: 500m }
 
-service:
-  type: ClusterIP          # 看情况修改，--set service.type=
-  port: 80
-
-persistence:
-  enabled: false
-
+# ----------------------------------------------------------------------------
+# nginx 配置
+# fastcgi_pass 用 127.0.0.1:9000 —— nginx 和 php-fpm 在同一个 Pod 里，
+# 共享网络命名空间，走回环即可。
+# ----------------------------------------------------------------------------
 nginx:
   conf: |
     server {
@@ -51,7 +125,7 @@ nginx:
         charset utf-8;
 
         location / {
-            try_files $uri $uri/ /index.php;
+            try_files $uri $uri/ /index.php?$query_string;
         }
 
         location = /favicon.ico { access_log off; log_not_found off; }
@@ -81,6 +155,7 @@ php:
     max_execution_time = 600
     memory_limit = 1024M
     error_reporting = E_ALL
+    display_errors = On
 
   www: |
     [www]

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "blog.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "blog.labels" . | nindent 4 }}
+data:
+  default.conf: |
+    {{- .Values.nginx.conf | nindent 4 }}
+  php.ini: |
+    {{- .Values.php.ini | nindent 4 }}
+  www.conf: |
+    {{- .Values.php.www | nindent 4 }}
