@@ -18,6 +18,12 @@ spec:
     metadata:
       labels:
         {{- include "blog.labels" . | nindent 8 }}
+      annotations:
+        # 把 ConfigMap 的内容摘要写进 pod template。
+        # 为什么必须这么做：ConfigMap 用 subPath 挂载时是【快照】，永远不会
+        # 热更新；而 ConfigMap 内容又不属于 pod template，光改它 Helm 算不出
+        # 差异、不会滚动。加上这个注解后，配置一改就会触发 Pod 重建。
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       volumes:
         - name: config
